@@ -171,7 +171,7 @@ def _to_ordered(obj):
     if not isinstance(obj, dict):
         return obj
     return sorted((k, _to_ordered(v))
-            for k, v in obj.items())
+            for k, v in list(obj.items()))
 
 
 def _ord_key(x):
