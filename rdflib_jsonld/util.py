@@ -1,3 +1,5 @@
+from future import standard_library
+standard_library.install_aliases()
 try:
     import json
     assert json  # workaround for pyflakes issue #13
@@ -11,7 +13,7 @@ from os.path import normpath
 if PY3:
     from urllib.parse import urljoin, urlsplit, urlunsplit
 else:
-    from urlparse import urljoin, urlsplit, urlunsplit
+    from urllib.parse import urljoin, urlsplit, urlunsplit
 
 from rdflib.parser import create_input_source
 if PY3:

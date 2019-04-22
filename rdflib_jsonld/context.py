@@ -5,10 +5,13 @@ Implementation of the JSON-LD Context structure. See:
     http://json-ld.org/
 
 """
+from builtins import str
+from past.builtins import basestring
+from builtins import object
 from collections import namedtuple
 from rdflib.namespace import RDF
 
-from ._compat import basestring, unicode
+from ._compat import basestring, str
 from .keys import (BASE, CONTAINER, CONTEXT, GRAPH, ID, INDEX, LANG, LIST,
         REV, SET, TYPE, VALUE, VOCAB)
 from . import errors
@@ -162,19 +165,19 @@ class Context(object):
         return self.resolve_iri(term_curie_or_iri)
 
     def shrink_iri(self, iri):
-        ns, name = split_iri(unicode(iri))
+        ns, name = split_iri(str(iri))
         pfx = self._prefixes.get(ns)
         if pfx:
             return u":".join((pfx, name))
         elif self._base:
-            if unicode(iri) == self._base:
+            if str(iri) == self._base:
                 return ""
             elif iri.startswith(self._basedomain):
                     return iri[len(self._basedomain):]
         return iri
 
     def to_symbol(self, iri):
-        iri = unicode(iri)
+        iri = str(iri)
         term = self.find_term(iri)
         if term:
             return term.name
@@ -220,7 +223,7 @@ class Context(object):
 
     def _read_source(self, source, source_url=None):
         self.vocab = source.get(VOCAB, self.vocab)
-        for key, value in source.items():
+        for key, value in list(source.items()):
             if key == LANG:
                 self.language = value
             elif key == VOCAB:
@@ -238,7 +241,7 @@ class Context(object):
             rev = dfn.get(REV)
             idref = rev or dfn.get(ID, UNDEF)
             if idref == TYPE:
-                idref = unicode(RDF.type)
+                idref = str(RDF.type)
             elif idref is not UNDEF:
                 idref = self._rec_expand(source, idref)
             elif ':' in name:

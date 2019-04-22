@@ -34,13 +34,16 @@ Example usage::
 # NOTE: This code reads the entire JSON object into memory before parsing, but
 # we should consider streaming the input to deal with arbitrarily large graphs.
 
+from builtins import str
+from past.builtins import basestring
+from builtins import object
 import warnings
 from rdflib.graph import ConjunctiveGraph
 from rdflib.parser import Parser, URLInputSource
 from rdflib.namespace import RDF, XSD
 from rdflib.term import URIRef, BNode, Literal
 
-from ._compat import basestring, unicode
+from ._compat import basestring, str
 from .context import Context, Term, UNDEF
 from .util import source_to_json, VOCAB_DELIMS, context_from_urlinputsource
 from .keys import CONTEXT, GRAPH, ID, INDEX, LANG, LIST, REV, SET, TYPE, VALUE, VOCAB
@@ -57,7 +60,7 @@ except ImportError:
     pass
 
 
-TYPE_TERM = Term(unicode(RDF.type), TYPE, VOCAB)
+TYPE_TERM = Term(str(RDF.type), TYPE, VOCAB)
 
 ALLOW_LISTS_OF_LISTS = True # NOTE: Not allowed in JSON-LD 1.0
 
@@ -130,7 +133,7 @@ class Parser(object):
 
         if context.vocab:
             dataset.bind(None, context.vocab)
-        for name, term in context.terms.items():
+        for name, term in list(context.terms.items()):
             if term.id and term.id.endswith(VOCAB_DELIMS):
                 dataset.bind(name, term.id)
 
@@ -165,11 +168,11 @@ class Parser(object):
         # NOTE: crude way to signify that this node might represent a named graph
         no_id = id_val is None
 
-        for key, obj in node.items():
+        for key, obj in list(node.items()):
             if key in (CONTEXT, ID, context.get_key(ID)):
                 continue
             if key in (REV, context.get_key(REV)):
-                for rkey, robj in obj.items():
+                for rkey, robj in list(obj.items()):
                     self._key_to_graph(dataset, graph, context, subj, rkey, robj,
                             reverse=True, no_id=no_id)
             else:
@@ -195,14 +198,14 @@ class Parser(object):
             elif isinstance(obj, dict):
                 if term.container == INDEX:
                     obj_nodes = []
-                    for values in obj.values():
+                    for values in list(obj.values()):
                         if not isinstance(values, list):
                             obj_nodes.append(values)
                         else:
                             obj_nodes += values
                 elif term.container == LANG:
                     obj_nodes = []
-                    for lang, values in obj.items():
+                    for lang, values in list(obj.items()):
                         if not isinstance(values, list):
                             values = [values]
                         for v in values:

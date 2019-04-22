@@ -38,6 +38,8 @@ Example usage::
 # but we should consider streaming the output to deal with arbitrarily large
 # graphs.
 
+from builtins import str
+from builtins import object
 import warnings
 
 from rdflib.serializer import Serializer
@@ -45,7 +47,7 @@ from rdflib.graph import Graph
 from rdflib.term import URIRef, Literal, BNode
 from rdflib.namespace import RDF, XSD
 
-from ._compat import unicode
+from ._compat import str
 from .context import Context, UNDEF
 from .util import json
 from .keys import CONTEXT, GRAPH, ID, VOCAB, LIST, SET, LANG
@@ -95,9 +97,9 @@ def from_rdf(graph, context_data=None, base=None,
 
     if not context_data and auto_compact:
         context_data = dict(
-            (pfx, unicode(ns))
+            (pfx, str(ns))
             for (pfx, ns) in graph.namespaces() if pfx and
-            unicode(ns) != u"http://www.w3.org/XML/1998/namespace")
+            str(ns) != u"http://www.w3.org/XML/1998/namespace")
 
     if isinstance(context_data, Context):
         context = context_data
@@ -208,14 +210,14 @@ class Converter(object):
         context = self.context
 
         if isinstance(o, Literal):
-            datatype = unicode(o.datatype) if o.datatype else None
+            datatype = str(o.datatype) if o.datatype else None
             language = o.language
-            term = context.find_term(unicode(p), datatype, language=language)
+            term = context.find_term(str(p), datatype, language=language)
         else:
             containers = [LIST, None] if graph.value(o, RDF.first) else [None]
             for container in containers:
                 for coercion in (ID, VOCAB, UNDEF):
-                    term = context.find_term(unicode(p), coercion, container)
+                    term = context.find_term(str(p), coercion, container)
                     if term:
                         break
                 if term:
@@ -230,10 +232,10 @@ class Converter(object):
             if term.type:
                 node = self.type_coerce(o, term.type)
             elif term.language and o.language == term.language:
-                node = unicode(o)
+                node = str(o)
             elif context.language and (
                     term.language is None and o.language is None):
-                node = unicode(o)
+                node = str(o)
 
             if term.container == SET:
                 use_set = True
@@ -243,7 +245,7 @@ class Converter(object):
             elif term.container == LANG and language:
                 value = s_node.setdefault(p_key, {})
                 values = value.get(language)
-                node = unicode(o)
+                node = str(o)
                 if values:
                     if not isinstance(values, list):
                         value[language] = values = [values]
@@ -287,7 +289,7 @@ class Converter(object):
                 return o
         elif coerce_type == VOCAB and isinstance(o, URIRef):
             return self.context.to_symbol(o)
-        elif isinstance(o, Literal) and unicode(o.datatype) == coerce_type:
+        elif isinstance(o, Literal) and str(o.datatype) == coerce_type:
             return o
         else:
             return None
@@ -317,7 +319,7 @@ class Converter(object):
             if native:
                 v = o.toPython()
             else:
-                v = unicode(o)
+                v = str(o)
             if o.datatype:
                 if native:
                     if self.context.active:
